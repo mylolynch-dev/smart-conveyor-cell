@@ -1,0 +1,11 @@
+# Smart Conveyor Sorting Cell - Python Dependencies
+
+# PLC Simulator - Modbus TCP server
+pymodbus==3.7.4
+
+# HMI Backend
+fastapi==0.115.5
+uvicorn[standard]==0.32.1
+websockets==14.1
+aiosqlite==0.20.0
+pydantic==2.10.3

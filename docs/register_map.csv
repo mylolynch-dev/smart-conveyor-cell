@@ -1,0 +1,43 @@
+Modbus Function Code,Address (0-based),Tag Name,Description,R/W,Data Type,Scaling,Notes
+FC1 Read Coils,0,OUT_MOTOR_RUN,Motor run command,R,BOOL,,-
+FC1 Read Coils,1,OUT_GATE_A,Gate A solenoid (small → lane A),R,BOOL,,-
+FC1 Read Coils,2,OUT_GATE_B,Gate B solenoid (metal → lane B),R,BOOL,,-
+FC1 Read Coils,3,OUT_GATE_C,Gate C solenoid (large → lane C),R,BOOL,,-
+FC1 Read Coils,4,OUT_ALARM_HORN,Alarm horn,R,BOOL,,-
+FC1 Read Coils,5,OUT_ESTOP_LIGHT,E-stop indicator,R,BOOL,,-
+FC1 Read Coils,6,OUT_FAULT_LIGHT,Fault indicator,R,BOOL,,-
+FC1 Read Coils,7,OUT_RUN_LIGHT,Run indicator (green),R,BOOL,,-
+FC1 Read Coils,8,OUT_HEARTBEAT,Watchdog heartbeat (toggles 500ms),R,BOOL,,Monitor for changes within 1s
+FC2 Read Discrete Inputs,0,IN_START_PB,Start pushbutton,R,BOOL,,Momentary – cleared after one scan
+FC2 Read Discrete Inputs,1,IN_STOP_PB,Stop pushbutton,R,BOOL,,Momentary – cleared after one scan
+FC2 Read Discrete Inputs,2,IN_ESTOP,E-stop NC contact,R,BOOL,,TRUE=safe FALSE=activated
+FC2 Read Discrete Inputs,3,IN_FAULT_RESET,Fault reset button,R,BOOL,,Momentary
+FC2 Read Discrete Inputs,4,IN_MODE_SELECT,Mode select,R,BOOL,,0=Auto 1=Manual
+FC2 Read Discrete Inputs,5,IN_MOTOR_FEEDBACK,Motor auxiliary contact,R,BOOL,,Delayed 300ms after run command
+FC2 Read Discrete Inputs,6,IN_JAM_SENSOR,Jam sensor,R,BOOL,,-
+FC2 Read Discrete Inputs,7,IN_BOX_DETECT,Part presence sensor,R,BOOL,,-
+FC2 Read Discrete Inputs,8,IN_SIZE_SMALL,Size sensor — small,R,BOOL,,-
+FC2 Read Discrete Inputs,9,IN_SIZE_LARGE,Size sensor — large,R,BOOL,,-
+FC2 Read Discrete Inputs,10,IN_METAL_DETECT,Metal detector,R,BOOL,,-
+FC2 Read Discrete Inputs,11,IN_COLOR_RED,Color — red,R,BOOL,,-
+FC2 Read Discrete Inputs,12,IN_COLOR_BLUE,Color — blue,R,BOOL,,-
+FC2 Read Discrete Inputs,13,IN_GATE_A_CONFIRM,Gate A position confirm,R,BOOL,,-
+FC2 Read Discrete Inputs,14,IN_GATE_B_CONFIRM,Gate B position confirm,R,BOOL,,-
+FC3/FC6 Holding Registers,0,HR_SPEED_SETPOINT,Speed setpoint,R/W,UINT16,0-100 = 0-100%,Write from HMI
+FC3/FC6 Holding Registers,1,HR_JAM_TIMER_PRESET,Jam timer preset,R/W,UINT16,ticks × 100ms,Default 30 = 3.0s
+FC3/FC6 Holding Registers,2,HR_FAULT_CODE,Active fault code,R/W,UINT16,0=none,PLC writes; reset writes 0
+FC3/FC6 Holding Registers,3,HR_MODE_COMMAND,HMI mode command,R/W,UINT16,0=Auto 1=Manual,HMI writes
+FC3/FC6 Holding Registers,4,HR_HMI_COMMAND,HMI command pulse,R/W,UINT16,1=START 2=STOP 3=RESET 4=SHR,Auto-cleared after one scan
+FC3/FC6 Holding Registers,5,HR_SHIFT_RESET,Shift counter reset,R/W,UINT16,Write 1 to reset,Auto-cleared
+FC4 Input Registers,0,IR_BOX_COUNT_TOTAL,Total boxes this shift,R,UINT16,,Resets on shift reset
+FC4 Input Registers,1,IR_BOX_COUNT_SMALL,Small box count (lane A),R,UINT16,,-
+FC4 Input Registers,2,IR_BOX_COUNT_LARGE,Large box count (lane C),R,UINT16,,-
+FC4 Input Registers,3,IR_BOX_COUNT_METAL,Metal part count (lane B),R,UINT16,,-
+FC4 Input Registers,4,IR_SPEED_ACTUAL,Actual speed (ramped),R,UINT16,0-100%,-
+FC4 Input Registers,5,IR_MACHINE_STATE,Machine state,R,UINT16,0=IDLE 1=AUTO 2=MAN 3=FLT 4=EST,-
+FC4 Input Registers,6,IR_RUNTIME_SECS,Shift runtime seconds,R,UINT16,,Saturates at 65535
+FC4 Input Registers,7,IR_DOWNTIME_SECS,Shift downtime seconds,R,UINT16,,-
+FC4 Input Registers,8,IR_THROUGHPUT_PER_HR,Throughput boxes/hr,R,UINT16,,-
+FC4 Input Registers,9,IR_JAM_TIMER_ACC,Jam timer accumulated,R,UINT16,ticks,-
+FC4 Input Registers,10,IR_ALARM_WORD,Active alarm bitmask,R,UINT16,bit0=JAM bit1=FB bit2=WDG bit3=MM,-
+FC4 Input Registers,11,IR_LAST_FAULT_CODE,Last fault code,R,UINT16,,Preserved until shift reset

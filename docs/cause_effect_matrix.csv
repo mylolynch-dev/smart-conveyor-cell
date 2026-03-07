@@ -1,0 +1,20 @@
+Cause / Input,OUT_MOTOR_RUN,OUT_GATE_A,OUT_GATE_B,OUT_GATE_C,OUT_ALARM_HORN,OUT_ESTOP_LIGHT,OUT_FAULT_LIGHT,OUT_RUN_LIGHT,HR_FAULT_CODE,Machine State Change,Notes
+IN_START_PB rising edge (Auto mode),START,,,,,,,,,"IDLE → AUTO_RUN",Motor starts; seal-in latch sets
+IN_STOP_PB (any mode),STOP,,,,,,,,,"→ IDLE","Motor stops; latch clears"
+IN_ESTOP falls (NC opens),STOP,,,, HORN,LIGHT,,,"", "→ ESTOP","Emergency stop — highest priority override"
+IN_FAULT_RESET rising edge (fault cleared),,,,,,,,,CLEAR,"→ IDLE (from FAULT/ESTOP)","One-shot; state clears only if fault condition gone"
+IN_MODE_SELECT = 1 (motor stopped),,,,,,,,,,"IDLE → MANUAL","Mode change interlocked — motor must be stopped"
+IN_JAM_SENSOR active > timer preset,STOP,,,,HORN,,LIGHT,,"1 (JAM)","→ FAULT","Timer accumulates; fault latched"
+IN_MOTOR_FEEDBACK lost > 2s,STOP,,,,HORN,,LIGHT,,"2 (FB LOSS)","→ FAULT","Motor command ON but aux contact OFF"
+IN_SIZE_SMALL + IN_SIZE_LARGE both ON,,,,,,,LIGHT,,"4 (MISMATCH)","→ FAULT","Sensor mismatch — both size outputs active"
+IN_BOX_DETECT ON + IN_METAL_DETECT ON,,, GATE_B,,,,,,,,"Gate B opens; metal to lane B","Priority 1"
+IN_BOX_DETECT ON + IN_SIZE_LARGE ON,,,, GATE_C,,,,,,,"Gate C opens; large to lane C","Priority 2"
+IN_BOX_DETECT ON + IN_SIZE_SMALL ON,, GATE_A,,,,,,,,,"Gate A opens; small to lane A","Priority 3"
+IN_BOX_DETECT rising edge (motor on),,,,,,,,,,"BOX_COUNT_TOTAL+1","Counter increments on each new box"
+HR_SPEED_SETPOINT write from HMI,,,,,,,,,,"IR_SPEED_ACTUAL ramps","Ramp rate: 2% per 100ms"
+HR_HMI_COMMAND = 1 (START),START,,,,,,,,,"IDLE → AUTO_RUN","Same effect as physical start button"
+HR_HMI_COMMAND = 2 (STOP),STOP,,,,,,,,,"→ IDLE","Same effect as physical stop"
+HR_HMI_COMMAND = 3 (RESET),,,,,,,,,CLEAR,"→ IDLE","Same effect as fault reset button"
+HR_HMI_COMMAND = 4 (SHIFT_RESET),,,,,,,,,,,"All counters reset to 0","Shift start time resets"
+IR_BOX_COUNT_TOTAL >= 200,,,,,HORN,,,,,"PRODUCTION_COMPLETE","Horn fires once; one-shot bit"
+OUT_MOTOR_RUN = 0,,CLOSE,CLOSE,CLOSE,,,,,,"",All gates return to home (closed)

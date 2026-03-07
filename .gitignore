@@ -1,0 +1,27 @@
+__pycache__/
+*.py[cod]
+*.pyo
+.env
+venv/
+.venv/
+env/
+
+# SQLite databases
+*.db
+*.sqlite3
+
+# Logs
+*.log
+scada/alarm_logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/settings.json
+.idea/
+
+# Temp
+*.tmp
+txt

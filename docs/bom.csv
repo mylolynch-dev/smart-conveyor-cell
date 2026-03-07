@@ -1,0 +1,27 @@
+Item #,Part Number,Description,Manufacturer,Qty,Unit,Unit Cost (USD),Extended Cost (USD),Lead Time,Notes
+1,1756-L83E,ControlLogix L83E PLC — 20MB,Allen-Bradley,1,EA,4200.00,4200.00,4-6 weeks,Main PLC (simulation uses OpenPLC)
+2,1756-IB16,16-pt 24VDC digital input module,Allen-Bradley,2,EA,380.00,760.00,2-3 weeks,Cards 1 & 2 for field inputs
+3,1756-OB16,16-pt 24VDC digital output module,Allen-Bradley,1,EA,420.00,420.00,2-3 weeks,Card 3 for field outputs
+4,1756-A7,7-slot ControlLogix chassis,Allen-Bradley,1,EA,650.00,650.00,2-3 weeks,-
+5,1756-PA72,24VDC power supply module,Allen-Bradley,1,EA,380.00,380.00,2-3 weeks,-
+6,22B-D4P0N104,PowerFlex 40 VFD 2HP 480V,Allen-Bradley,1,EA,680.00,680.00,2-4 weeks,Conveyor motor speed control
+7,MOT-3PH-2HP,3-Phase conveyor drive motor 2HP,Baldor,1,EA,420.00,420.00,1-2 weeks,TEFC enclosure IP55
+8,E3-PLUS,E3 Plus Motor Protection Relay,Allen-Bradley,1,EA,280.00,280.00,2 weeks,Overload protection for motor
+9,800F-E11,22mm momentary pushbutton green,Allen-Bradley,2,EA,45.00,90.00,1 week,Start buttons
+10,800F-E01,22mm momentary pushbutton red,Allen-Bradley,2,EA,45.00,90.00,1 week,Stop buttons
+11,800F-QH2,22mm emergency stop button,Allen-Bradley,1,EA,95.00,95.00,1 week,E-stop — safety rated Category 0
+12,800F-QX44,22mm 2-pos keyed selector,Allen-Bradley,1,EA,68.00,68.00,1 week,Auto/Manual mode select
+13,800F-AF2,22mm LED pilot light — green,Allen-Bradley,1,EA,28.00,28.00,1 week,Run indicator
+14,800F-AF4,22mm LED pilot light — amber,Allen-Bradley,1,EA,28.00,28.00,1 week,Fault indicator
+15,800F-AF1,22mm LED pilot light — red,Allen-Bradley,1,EA,28.00,28.00,1 week,E-stop indicator
+16,855T-B10DN6,Stack light — red/amber/green,Allen-Bradley,1,EA,185.00,185.00,1 week,Column light for machine status
+17,880E-D8SP1-P5,Right-angle photoelectric sensor,Allen-Bradley,4,EA,120.00,480.00,1 week,Entry detect + size sensors
+18,872C-D8NP18-D4,M18 inductive proximity sensor,Allen-Bradley,2,EA,75.00,150.00,1 week,Metal detector + jam sensor
+19,PANEL-36X30,36"×30" NEMA 12 enclosure,Hoffman,1,EA,580.00,580.00,1-2 weeks,Control panel enclosure
+20,MISC-WIRE,Control wiring 16/18/22AWG,General Cable,1,LOT,320.00,320.00,Stock,Bundle: 16AWG red/black; 18AWG; 22AWG
+21,MISC-TERM,DIN rail terminal blocks,Phoenix Contact,1,LOT,180.00,180.00,Stock,PT 2.5 series + end plates + labels
+22,MISC-DIN,DIN rail 35mm × 2m,Generic,2,EA,15.00,30.00,Stock,-
+23,MISC-FUSE,Fuse holders + fuses 1A/2A,Bussmann,1,LOT,95.00,95.00,Stock,-
+24,24VDC-PSU,24VDC 10A power supply,Phoenix Contact,1,EA,220.00,220.00,1 week,Panel 24VDC bus for I/O and solenoids
+25,NET-SWITCH,8-port managed Ethernet switch,Cisco SG,1,EA,180.00,180.00,1 week,HMI PC + PLC + SCADA network
+,,,,,,TOTAL:,$8,137.00,,Budgetary estimate — prices approximate

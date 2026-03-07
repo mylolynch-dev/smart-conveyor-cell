@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Conveyor Sorting Cell — HMI</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ── Top bar ──────────────────────────────────────────────── -->
+<div class="topbar">
+  <div class="topbar-brand">
+    Smart Conveyor Sorting Cell
+    <span>HMI v1.0</span>
+  </div>
+  <div class="topbar-status">
+    <span><span class="status-dot" id="modbus-dot"></span><span id="modbus-txt">Connecting…</span></span>
+    <span id="server-time" style="font-variant-numeric:tabular-nums">--:--:--</span>
+  </div>
+</div>
+
+<!-- ── Fault banner ──────────────────────────────────────────── -->
+<div id="fault-banner">⚠ FAULT ACTIVE — <span id="fault-text"></span></div>
+
+<!-- ── Tab navigation ────────────────────────────────────────── -->
+<nav class="tab-nav">
+  <button class="tab-btn active" data-tab="overview">Overview</button>
+  <button class="tab-btn" data-tab="manual">Manual Controls</button>
+  <button class="tab-btn" data-tab="alarms">Alarms <span id="alarm-badge" style="display:none;background:var(--accent-red);color:#fff;border-radius:10px;padding:0 6px;font-size:10px;margin-left:4px"></span></button>
+  <button class="tab-btn" data-tab="production">Production</button>
+  <button class="tab-btn" data-tab="maintenance">Maintenance</button>
+  <button class="tab-btn" data-tab="network">Network</button>
+</nav>
+
+<div class="content">
+
+  <!-- ══════════════════════════════════════════════════════════
+       SCREEN 1: OVERVIEW
+  ══════════════════════════════════════════════════════════════ -->
+  <div class="screen active" id="screen-overview">
+
+    <!-- State + quick controls -->
+    <div class="card">
+      <div class="card-title">Machine Status</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+        <div>
+          <div style="margin-bottom:10px">
+            <span class="state-badge IDLE" id="state-badge">IDLE</span>
+            &nbsp;
+            <span class="pill pill-grey" id="mode-badge">AUTO</span>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-green" onclick="sendCommand(1)">▶ START</button>
+            <button class="btn btn-red"   onclick="sendCommand(2)">■ STOP</button>
+            <button class="btn btn-amber" onclick="sendCommand(3)">↺ RESET FAULT</button>
+          </div>
+        </div>
+        <div class="led-row">
+          <div class="led-item"><div class="led off" id="led-motor"></div><span class="led-lbl">Motor Run</span></div>
+          <div class="led-item"><div class="led off" id="led-estop"></div><span class="led-lbl">E-Stop Active</span></div>
+          <div class="led-item"><div class="led off" id="led-fault"></div><span class="led-lbl">Fault</span></div>
+          <div class="led-item"><div class="led off" id="led-horn"></div><span class="led-lbl">Alarm Horn</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Conveyor animation -->
+    <div class="conveyor-wrap card">
+      <div class="card-title">Conveyor Overview</div>
+      <svg id="conveyor-svg" viewBox="0 0 700 160" xmlns="http://www.w3.org/2000/svg" style="display:block;width:100%;max-width:700px;margin:0 auto">
+        <!-- Belt -->
+        <rect x="30" y="70" width="640" height="22" rx="5" fill="#21262d" stroke="#30363d"/>
+        <!-- Belt lines (animated) -->
+        <g id="belt-lines" opacity="0.4">
+          <line x1="80"  y1="70" x2="80"  y2="92" stroke="#58a6ff" stroke-width="1.5"/>
+          <line x1="160" y1="70" x2="160" y2="92" stroke="#58a6ff" stroke-width="1.5"/>
+          <line x1="240" y1="70" x2="240" y2="92" stroke="#58a6ff" stroke-width="1.5"/>
+          <line x1="320" y1="70" x2="320" y2="92" stroke="#58a6ff" stroke-width="1.5"/>
+          <line x1="400" y1="70" x2="400" y2="92" stroke="#58a6ff" stroke-width="1.5"/>
+          <line x1="480" y1="70" x2="480" y2="92" stroke="#58a6ff" stroke-width="1.5"/>
+          <line x1="560" y1="70" x2="560" y2="92" stroke="#58a6ff" stroke-width="1.5"/>
+          <line x1="640" y1="70" x2="640" y2="92" stroke="#58a6ff" stroke-width="1.5"/>
+        </g>
+        <!-- Motor -->
+        <circle cx="30" cy="81" r="18" fill="#21262d" stroke="#30363d" stroke-width="2"/>
+        <text x="30" y="86" text-anchor="middle" fill="#8b949e" font-size="10">MTR</text>
+        <!-- End roller -->
+        <circle cx="670" cy="81" r="14" fill="#21262d" stroke="#30363d"/>
+        <!-- Sensors -->
+        <g font-size="8" fill="#8b949e" text-anchor="middle">
+          <rect x="110" y="55" width="30" height="12" rx="3" fill="#161b22" stroke="#30363d"/>
+          <text x="125" y="65">ENTRY</text>
+          <rect x="200" y="55" width="40" height="12" rx="3" fill="#161b22" stroke="#30363d"/>
+          <text x="220" y="65">SIZE/MTL</text>
+          <rect x="360" y="55" width="30" height="12" rx="3" fill="#161b22" stroke="#30363d"/>
+          <text x="375" y="65">GATE A</text>
+          <rect x="460" y="55" width="30" height="12" rx="3" fill="#161b22" stroke="#30363d"/>
+          <text x="475" y="65">GATE B</text>
+          <rect x="560" y="55" width="30" height="12" rx="3" fill="#161b22" stroke="#30363d"/>
+          <text x="575" y="65">GATE C</text>
+        </g>
+        <!-- Gate A -->
+        <line id="gate-a" x1="375" y1="92" x2="375" y2="130" stroke="#8b949e" stroke-width="3" stroke-linecap="round"/>
+        <!-- Gate B -->
+        <line id="gate-b" x1="475" y1="92" x2="475" y2="130" stroke="#8b949e" stroke-width="3" stroke-linecap="round"/>
+        <!-- Gate C -->
+        <line id="gate-c" x1="575" y1="92" x2="575" y2="130" stroke="#8b949e" stroke-width="3" stroke-linecap="round"/>
+        <!-- Lane labels -->
+        <g font-size="9" fill="#484f58">
+          <text x="375" y="148" text-anchor="middle">Lane A (Small)</text>
+          <text x="475" y="148" text-anchor="middle">Lane B (Metal)</text>
+          <text x="575" y="148" text-anchor="middle">Lane C (Large)</text>
+        </g>
+        <!-- Moving box (JS controlled) -->
+        <rect id="box-anim" x="-50" y="55" width="30" height="30" rx="4" fill="#2d333b" stroke="#58a6ff" stroke-width="1.5" opacity="0"/>
+        <!-- Speed label -->
+        <text id="speed-label" x="350" y="115" text-anchor="middle" fill="#484f58" font-size="11">Speed: -- %</text>
+      </svg>
+    </div>
+
+    <!-- Metric tiles -->
+    <div class="grid-4">
+      <div class="metric-tile">
+        <div class="val" id="ov-total">0</div>
+        <div class="lbl">Total Boxes</div>
+        <div class="sublbl">this shift</div>
+      </div>
+      <div class="metric-tile">
+        <div class="val" id="ov-tph">0</div>
+        <div class="lbl">Throughput</div>
+        <div class="sublbl">boxes / hr</div>
+      </div>
+      <div class="metric-tile">
+        <div class="val" id="ov-speed">0<span style="font-size:16px">%</span></div>
+        <div class="lbl">Speed Actual</div>
+        <div class="sublbl">setpoint: <span id="ov-setpt">--</span>%</div>
+      </div>
+      <div class="metric-tile">
+        <div class="val" id="ov-runtime">0:00</div>
+        <div class="lbl">Runtime</div>
+        <div class="sublbl">downtime: <span id="ov-down">0:00</span></div>
+      </div>
+    </div>
+
+  </div><!-- /overview -->
+
+
+  <!-- ══════════════════════════════════════════════════════════
+       SCREEN 2: MANUAL CONTROLS
+  ══════════════════════════════════════════════════════════════ -->
+  <div class="screen" id="screen-manual">
+    <div class="card">
+      <div class="card-title">Mode Select</div>
+      <div class="toggle-wrap">
+        <span class="text-muted">AUTO</span>
+        <label class="toggle">
+          <input type="checkbox" id="mode-toggle" onchange="setMode(this.checked?1:0)">
+          <span class="toggle-slider"></span>
+        </label>
+        <span class="text-muted">MANUAL</span>
+        <span class="text-muted" style="margin-left:16px;font-size:11px">(Motor must be stopped to change mode)</span>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Motor Control</div>
+        <div class="btn-row">
+          <button class="btn btn-green" id="man-start" onclick="sendCommand(1)">▶ START</button>
+          <button class="btn btn-red"   id="man-stop"  onclick="sendCommand(2)">■ STOP</button>
+        </div>
+        <hr class="divider">
+        <div class="card-title">Speed Setpoint</div>
+        <div class="slider-row">
+          <span class="text-muted" style="font-size:11px">0%</span>
+          <input type="range" min="0" max="100" value="60" id="speed-slider" oninput="updateSpeedLabel(this.value)" onchange="setSpeed(this.value)">
+          <span class="text-muted" style="font-size:11px">100%</span>
+          <span class="slider-val" id="speed-slider-val">60%</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Gate Control (Manual)</div>
+        <div class="led-row" style="gap:12px">
+          <div class="led-item" style="justify-content:space-between;width:100%">
+            <span class="led-lbl">Gate A — Lane A (Small)</span>
+            <div class="led off" id="man-gate-a"></div>
+          </div>
+          <div class="led-item" style="justify-content:space-between;width:100%">
+            <span class="led-lbl">Gate B — Lane B (Metal)</span>
+            <div class="led off" id="man-gate-b"></div>
+          </div>
+          <div class="led-item" style="justify-content:space-between;width:100%">
+            <span class="led-lbl">Gate C — Lane C (Large)</span>
+            <div class="led off" id="man-gate-c"></div>
+          </div>
+        </div>
+        <p class="text-muted mt-8" style="font-size:11px">Gates are PLC-controlled in auto mode. Indicators show current state.</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Fault Control</div>
+      <div class="btn-row">
+        <button class="btn btn-amber" onclick="sendCommand(3)">↺ Reset Fault</button>
+        <button class="btn btn-ghost" onclick="sendCommand(4)">⟳ Reset Shift Counters</button>
+      </div>
+      <p class="text-muted mt-8" style="font-size:11px">Fault reset is only effective when the fault condition has cleared.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Jam Timer Preset</div>
+      <div class="slider-row">
+        <span class="text-muted" style="font-size:11px">5</span>
+        <input type="range" min="5" max="100" value="30" id="jam-slider" oninput="updateJamLabel(this.value)" onchange="setJamPreset(this.value)">
+        <span class="text-muted" style="font-size:11px">100</span>
+        <span class="slider-val" id="jam-slider-val">30</span>
+        <span class="text-muted" style="font-size:11px">ticks (×100ms)</span>
+      </div>
+    </div>
+  </div><!-- /manual -->
+
+
+  <!-- ══════════════════════════════════════════════════════════
+       SCREEN 3: ALARMS
+  ══════════════════════════════════════════════════════════════ -->
+  <div class="screen" id="screen-alarms">
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Active Alarms</div>
+        <div id="active-alarms-wrap">
+          <div class="empty-msg">No active alarms</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Alarm History</div>
+        <div id="alarm-history-wrap" style="max-height:400px;overflow-y:auto">
+          <div class="empty-msg">Loading…</div>
+        </div>
+      </div>
+    </div>
+    <div style="text-align:right;margin-top:-8px">
+      <button class="btn btn-ghost btn-sm" onclick="loadAlarms()">↻ Refresh</button>
+    </div>
+  </div><!-- /alarms -->
+
+
+  <!-- ══════════════════════════════════════════════════════════
+       SCREEN 4: PRODUCTION
+  ══════════════════════════════════════════════════════════════ -->
+  <div class="screen" id="screen-production">
+    <div class="grid-4">
+      <div class="metric-tile">
+        <div class="val text-blue"  id="prod-total">0</div>
+        <div class="lbl">Total Boxes</div>
+        <div class="sublbl">shift</div>
+      </div>
+      <div class="metric-tile">
+        <div class="val text-green" id="prod-small">0</div>
+        <div class="lbl">Lane A — Small</div>
+      </div>
+      <div class="metric-tile">
+        <div class="val text-amber" id="prod-large">0</div>
+        <div class="lbl">Lane C — Large</div>
+      </div>
+      <div class="metric-tile">
+        <div class="val text-red"   id="prod-metal">0</div>
+        <div class="lbl">Lane B — Metal</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Throughput</div>
+        <div style="font-size:36px;font-weight:700;color:var(--accent-blue)" id="prod-tph">0</div>
+        <div class="text-muted" style="font-size:12px">boxes / hour (rolling)</div>
+        <hr class="divider">
+        <div class="card-title">OEE-Lite</div>
+        <div style="font-size:28px;font-weight:700" id="oee-pct">--%</div>
+        <div class="progress-bar-wrap">
+          <div class="progress-bar-bg"><div class="progress-bar-fill fill-green" id="oee-bar" style="width:0%"></div></div>
+        </div>
+        <div class="text-muted" style="font-size:11px">Runtime ÷ (Runtime + Downtime)</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Shift Time</div>
+        <div class="progress-bar-wrap">
+          <div class="progress-bar-lbl"><span>Runtime</span><span id="runtime-lbl">0:00</span></div>
+          <div class="progress-bar-bg"><div class="progress-bar-fill fill-green" id="runtime-bar" style="width:0%"></div></div>
+        </div>
+        <div class="progress-bar-wrap mt-8">
+          <div class="progress-bar-lbl"><span>Downtime</span><span id="downtime-lbl">0:00</span></div>
+          <div class="progress-bar-bg"><div class="progress-bar-fill fill-red" id="downtime-bar" style="width:0%"></div></div>
+        </div>
+        <hr class="divider">
+        <div class="card-title">Speed Trend</div>
+        <canvas id="trend-canvas" height="100"></canvas>
+      </div>
+    </div>
+  </div><!-- /production -->
+
+
+  <!-- ══════════════════════════════════════════════════════════
+       SCREEN 5: MAINTENANCE
+  ══════════════════════════════════════════════════════════════ -->
+  <div class="screen" id="screen-maintenance">
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Sensor States (Live)</div>
+        <div class="sensor-grid" id="sensor-grid"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Timer / Counter Values</div>
+        <div id="timer-values"></div>
+        <hr class="divider">
+        <div class="card-title">Watchdog Heartbeat</div>
+        <div style="display:flex;align-items:center;gap:12px">
+          <div class="led off" id="hb-led" style="width:18px;height:18px"></div>
+          <span id="hb-text" class="text-muted">Waiting…</span>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Last Fault</div>
+      <div id="last-fault-info" class="text-muted">No faults recorded this session.</div>
+      <hr class="divider">
+      <div class="btn-row">
+        <button class="btn btn-amber btn-sm" onclick="sendCommand(3)">↺ Clear Fault</button>
+        <button class="btn btn-ghost btn-sm" onclick="sendCommand(4)">⟳ Reset Counters</button>
+      </div>
+    </div>
+  </div><!-- /maintenance -->
+
+
+  <!-- ══════════════════════════════════════════════════════════
+       SCREEN 6: NETWORK STATUS
+  ══════════════════════════════════════════════════════════════ -->
+  <div class="screen" id="screen-network">
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Modbus TCP Connection</div>
+        <table class="device-table">
+          <tr><td class="text-muted">Status</td><td id="net-status">—</td></tr>
+          <tr><td class="text-muted">PLC Host</td><td>127.0.0.1</td></tr>
+          <tr><td class="text-muted">PLC Port</td><td>5020</td></tr>
+          <tr><td class="text-muted">Protocol</td><td>Modbus TCP (IEC 60870)</td></tr>
+          <tr><td class="text-muted">Poll Rate</td><td>500 ms</td></tr>
+          <tr><td class="text-muted">Last Poll Latency</td><td id="net-latency">—</td></tr>
+          <tr><td class="text-muted">Last Successful Read</td><td id="net-last-ok">—</td></tr>
+          <tr><td class="text-muted">WS Clients</td><td>1 (this browser)</td></tr>
+        </table>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Network Topology</div>
+        <pre style="font-size:11px;color:var(--text-muted);line-height:1.8;background:var(--bg-panel);padding:12px;border-radius:6px;overflow-x:auto">
+┌──────────────────────────────┐
+│     Operator Workstation     │
+│  Browser  ←→  FastAPI/WS    │
+│  http://localhost:8000       │
+└──────────┬───────────────────┘
+           │ Modbus TCP (port 5020)
+           │ pymodbus AsyncClient
+           │ Poll: 500ms
+┌──────────▼───────────────────┐
+│     Virtual PLC Simulator    │
+│  pymodbus TCP Server         │
+│  100ms scan cycle            │
+│  Ladder Logic (12 rungs)     │
+│  I/O Simulator               │
+└──────────────────────────────┘
+        </pre>
+        <div style="margin-top:12px;font-size:11px;color:var(--text-muted)">
+          <strong>Register Map Summary:</strong><br>
+          Coils (0x): 9 digital outputs<br>
+          Discrete Inputs (1x): 15 field inputs<br>
+          Holding Registers (4x): 6 R/W setpoints<br>
+          Input Registers (3x): 12 status values
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Protocol Notes — Where Real Plant Protocols Would Fit</div>
+      <div style="font-size:12px;color:var(--text-muted);line-height:1.8">
+        <strong class="text-primary">Modbus TCP</strong> (implemented here) — Used for simple PLC-to-SCADA polling. No device discovery, no implicit messaging. Good for legacy equipment and simple IO. Widely supported.<br><br>
+        <strong class="text-primary">EtherNet/IP</strong> — Allen-Bradley standard. Uses CIP (Common Industrial Protocol). Supports implicit (cyclic I/O) and explicit (request/response) messaging. Required for Rockwell PLCs in real plants.<br><br>
+        <strong class="text-primary">PROFINET</strong> — Siemens standard. Real-time Ethernet for motion and safety. Two timing classes: RT (10ms) and IRT (1ms). Required for Siemens S7 PLCs.<br><br>
+        <strong class="text-primary">IO-Link</strong> — Point-to-point sensor/actuator bus. Sits below fieldbus layer. Used for smart sensors with parameterization and diagnostics.<br><br>
+        <strong class="text-primary">DeviceNet</strong> — CAN-based fieldbus. Common in older Rockwell installations. Being superseded by EtherNet/IP.
+      </div>
+    </div>
+  </div><!-- /network -->
+
+</div><!-- /content -->
+
+<script src="app.js"></script>
+<script src="screens/overview.js"></script>
+<script src="screens/manual.js"></script>
+<script src="screens/alarms.js"></script>
+<script src="screens/production.js"></script>
+<script src="screens/maintenance.js"></script>
+<script src="screens/network.js"></script>
+</body>
+</html>

@@ -1,0 +1,43 @@
+Tag Name,Type,Address,Description,Engineering Units,Safety Critical,Default Value
+IN_START_PB,Digital Input,IX0.0,Start pushbutton (momentary NO),Boolean,No,FALSE
+IN_STOP_PB,Digital Input,IX0.1,Stop pushbutton (momentary NC),Boolean,No,FALSE
+IN_ESTOP,Digital Input,IX0.2,Emergency stop NC contact - TRUE=safe FALSE=activated,Boolean,YES,TRUE
+IN_FAULT_RESET,Digital Input,IX0.3,Fault reset pushbutton (momentary),Boolean,No,FALSE
+IN_MODE_SELECT,Digital Input,IX0.4,Mode select 0=Auto 1=Manual,Boolean,No,FALSE
+IN_MOTOR_FEEDBACK,Digital Input,IX0.5,Motor auxiliary contact (run confirmation),Boolean,No,FALSE
+IN_JAM_SENSOR,Digital Input,IX0.6,Conveyor jam detection proximity sensor,Boolean,No,FALSE
+IN_BOX_DETECT,Digital Input,IX0.7,Part presence sensor at conveyor entry,Boolean,No,FALSE
+IN_SIZE_SMALL,Digital Input,IX0.8,Size sensor output - small box detected,Boolean,No,FALSE
+IN_SIZE_LARGE,Digital Input,IX0.9,Size sensor output - large box detected,Boolean,No,FALSE
+IN_METAL_DETECT,Digital Input,IX0.10,Metal detector output,Boolean,No,FALSE
+IN_COLOR_RED,Digital Input,IX0.11,Color sensor - red,Boolean,No,FALSE
+IN_COLOR_BLUE,Digital Input,IX0.12,Color sensor - blue,Boolean,No,FALSE
+IN_GATE_A_CONFIRM,Digital Input,IX0.13,Gate A position confirmation feedback,Boolean,No,FALSE
+IN_GATE_B_CONFIRM,Digital Input,IX0.14,Gate B position confirmation feedback,Boolean,No,FALSE
+OUT_MOTOR_RUN,Digital Output,QX0.0,Conveyor motor run command to VFD/starter,Boolean,No,FALSE
+OUT_GATE_A,Digital Output,QX0.1,Diverter gate A solenoid - routes small boxes to lane A,Boolean,No,FALSE
+OUT_GATE_B,Digital Output,QX0.2,Diverter gate B solenoid - routes metal parts to lane B,Boolean,No,FALSE
+OUT_GATE_C,Digital Output,QX0.3,Diverter gate C solenoid - routes large boxes to lane C,Boolean,No,FALSE
+OUT_ALARM_HORN,Digital Output,QX0.4,Audible alarm horn,Boolean,No,FALSE
+OUT_ESTOP_LIGHT,Digital Output,QX0.5,E-stop activated indicator (red pilot light),Boolean,No,FALSE
+OUT_FAULT_LIGHT,Digital Output,QX0.6,Fault present indicator (amber pilot light),Boolean,No,FALSE
+OUT_RUN_LIGHT,Digital Output,QX0.7,Conveyor running indicator (green pilot light),Boolean,No,FALSE
+OUT_HEARTBEAT,Digital Output,QX0.8,PLC watchdog heartbeat (toggles every 500ms),Boolean,No,FALSE
+HR_SPEED_SETPOINT,Holding Register,MW0,Conveyor speed setpoint,Percent (0-100),No,60
+HR_JAM_TIMER_PRESET,Holding Register,MW1,Jam detection timer preset value,100ms ticks,No,30
+HR_FAULT_CODE,Holding Register,MW2,Active fault code (0=none),Enum,No,0
+HR_MODE_COMMAND,Holding Register,MW3,HMI mode command override 0=Auto 1=Manual,Enum,No,0
+HR_HMI_COMMAND,Holding Register,MW4,HMI command pulse register 1=START 2=STOP 3=RESET 4=SHIFT_RESET,Enum,No,0
+HR_SHIFT_RESET,Holding Register,MW5,Write 1 to reset shift counters,Boolean,No,0
+IR_BOX_COUNT_TOTAL,Input Register,MW10,Total boxes processed this shift,Count,No,0
+IR_BOX_COUNT_SMALL,Input Register,MW11,Small boxes routed to lane A,Count,No,0
+IR_BOX_COUNT_LARGE,Input Register,MW12,Large boxes routed to lane C,Count,No,0
+IR_BOX_COUNT_METAL,Input Register,MW13,Metal parts routed to lane B,Count,No,0
+IR_SPEED_ACTUAL,Input Register,MW14,Actual conveyor speed (ramped),Percent (0-100),No,0
+IR_MACHINE_STATE,Input Register,MW15,Current machine state 0=IDLE 1=AUTO 2=MANUAL 3=FAULT 4=ESTOP,Enum,No,0
+IR_RUNTIME_SECS,Input Register,MW16,Total shift runtime in seconds,Seconds,No,0
+IR_DOWNTIME_SECS,Input Register,MW17,Total shift downtime in seconds,Seconds,No,0
+IR_THROUGHPUT_PER_HR,Input Register,MW18,Rolling throughput (boxes per hour),Boxes/hr,No,0
+IR_JAM_TIMER_ACC,Input Register,MW19,Jam timer accumulated value,100ms ticks,No,0
+IR_ALARM_WORD,Input Register,MW20,Active alarm bitmask (bit0=JAM bit1=FBCK bit2=WDG bit3=MISMATCH),Bits,No,0
+IR_LAST_FAULT_CODE,Input Register,MW21,Last latched fault code,Enum,No,0

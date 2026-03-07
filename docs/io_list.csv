@@ -1,0 +1,25 @@
+I/O Number,Tag Name,Description,Type,Card Slot,Channel,Engineering Units,Range,Safety Critical,Wiring Notes
+DI-001,IN_START_PB,Start pushbutton — operator panel,Digital Input,Card 1,0,Boolean,0/1,No,NO contact; 24VDC sourcing; 16AWG
+DI-002,IN_STOP_PB,Stop pushbutton — operator panel,Digital Input,Card 1,1,Boolean,0/1,No,NC contact; 24VDC sourcing; 16AWG
+DI-003,IN_ESTOP,Emergency stop — hardwired NC,Digital Input,Card 1,2,Boolean,0/1,YES,Safety-rated NC contact; separate 24VDC safety circuit; 14AWG
+DI-004,IN_FAULT_RESET,Fault reset pushbutton — panel,Digital Input,Card 1,3,Boolean,0/1,No,Momentary NO; 24VDC; 16AWG
+DI-005,IN_MODE_SELECT,Mode select switch — panel,Digital Input,Card 1,4,Boolean,0/1,No,2-position keyed selector; 24VDC; 16AWG
+DI-006,IN_MOTOR_FEEDBACK,Motor auxiliary contact — starter,Digital Input,Card 1,5,Boolean,0/1,No,Motor starter aux contact; 24VDC; 18AWG
+DI-007,IN_JAM_SENSOR,Jam detection — proximity sensor,Digital Input,Card 1,6,Boolean,0/1,No,PNP prox sensor; 24VDC; 3-wire; 18AWG shielded
+DI-008,IN_BOX_DETECT,Box presence — entry photoelectric,Digital Input,Card 1,7,Boolean,0/1,No,Diffuse photoelectric; 24VDC; 3-wire; 18AWG
+DI-009,IN_SIZE_SMALL,Size sensor — small detect,Digital Input,Card 2,0,Boolean,0/1,No,Through-beam; 24VDC; 18AWG shielded
+DI-010,IN_SIZE_LARGE,Size sensor — large detect,Digital Input,Card 2,1,Boolean,0/1,No,Through-beam; 24VDC; 18AWG shielded
+DI-011,IN_METAL_DETECT,Metal detector — inductive,Digital Input,Card 2,2,Boolean,0/1,No,Inductive prox; 24VDC; 3-wire; 18AWG shielded
+DI-012,IN_COLOR_RED,Color sensor — red channel,Digital Input,Card 2,3,Boolean,0/1,No,RGB color sensor digital output; 24VDC; 18AWG
+DI-013,IN_COLOR_BLUE,Color sensor — blue channel,Digital Input,Card 2,4,Boolean,0/1,No,RGB color sensor digital output; 24VDC; 18AWG
+DI-014,IN_GATE_A_CONFIRM,Gate A position confirmation,Digital Input,Card 2,5,Boolean,0/1,No,Limit switch on gate A actuator; 24VDC; 18AWG
+DI-015,IN_GATE_B_CONFIRM,Gate B position confirmation,Digital Input,Card 2,6,Boolean,0/1,No,Limit switch on gate B actuator; 24VDC; 18AWG
+DO-001,OUT_MOTOR_RUN,Conveyor motor run command,Digital Output,Card 3,0,Boolean,0/1,No,24VDC output to motor starter coil; 16AWG; fused 2A
+DO-002,OUT_GATE_A,Diverter gate A solenoid,Digital Output,Card 3,1,Boolean,0/1,No,24VDC to pneumatic solenoid valve; 18AWG; fused 1A
+DO-003,OUT_GATE_B,Diverter gate B solenoid,Digital Output,Card 3,2,Boolean,0/1,No,24VDC to pneumatic solenoid valve; 18AWG; fused 1A
+DO-004,OUT_GATE_C,Diverter gate C solenoid,Digital Output,Card 3,3,Boolean,0/1,No,24VDC to pneumatic solenoid valve; 18AWG; fused 1A
+DO-005,OUT_ALARM_HORN,Alarm horn,Digital Output,Card 3,4,Boolean,0/1,No,24VDC horn; 18AWG; fused 2A
+DO-006,OUT_ESTOP_LIGHT,E-stop indicator — red pilot,Digital Output,Card 3,5,Boolean,0/1,No,24VDC LED pilot; 22AWG; panel-mounted
+DO-007,OUT_FAULT_LIGHT,Fault indicator — amber pilot,Digital Output,Card 3,6,Boolean,0/1,No,24VDC LED pilot; 22AWG; panel-mounted
+DO-008,OUT_RUN_LIGHT,Run indicator — green pilot,Digital Output,Card 3,7,Boolean,0/1,No,24VDC LED pilot; 22AWG; panel-mounted
+DO-009,OUT_HEARTBEAT,PLC watchdog heartbeat,Digital Output,Card 3,8,Boolean,0/1,No,Internal diagnostic; not wired to field; software use only
