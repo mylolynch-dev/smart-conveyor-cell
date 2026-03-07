@@ -5,8 +5,14 @@
 
 let _beltOffset = 0;
 let _boxX = -50;
+let _boxY = 55;
 let _boxVisible = false;
-let _prevBoxDetect = false;
+let _boxDiverting = false;
+let _boxTargetGateX = 700;
+let _boxSpeed = 400;          // px/s — fixed fast speed so each box crosses in ~1.5s
+let _boxQueue = [];           // queued boxes waiting to animate: [{type, speed}]
+let _prevBoxTotal = null;
+let _lastGateType = null;
 let _animFrame = null;
 
 function updateOverview(t) {
@@ -54,24 +60,35 @@ function updateOverview(t) {
     stopBeltAnimation();
   }
 
+  // Track active gate type so spawnBox can read it even if sensors cleared
+  if (t.OUT_GATE_B)      _lastGateType = 'metal';
+  else if (t.OUT_GATE_C) _lastGateType = 'large';
+  else if (t.OUT_GATE_A) _lastGateType = 'small';
+
   // ── Box animation trigger ──────────────────────────────────
-  const boxDetect = t.IN_BOX_DETECT;
-  if (boxDetect && !_prevBoxDetect) {
+  // Use total box count instead of IN_BOX_DETECT (which only lasts 200ms,
+  // shorter than the 500ms WebSocket poll — so the rising edge was often missed).
+  const boxTotal = t.IR_BOX_COUNT_TOTAL ?? 0;
+  if (_prevBoxTotal !== null && boxTotal > _prevBoxTotal) {
     spawnBox(t);
   }
-  _prevBoxDetect = boxDetect;
+  _prevBoxTotal = boxTotal;
 }
 
 function animateGate(id, open) {
   const el = document.getElementById(id);
   if (!el) return;
   if (open) {
-    // Rotate gate 45° to show diversion
-    el.setAttribute("transform", `rotate(45, ${el.getAttribute("x1")}, ${el.getAttribute("y1")})`);
+    // Swing gate 50° from vertical to show the deflector is extended
+    const x = parseFloat(el.getAttribute("x1"));
+    const y = parseFloat(el.getAttribute("y1"));
+    el.setAttribute("transform", `rotate(-50, ${x}, ${y})`);
     el.setAttribute("stroke", "#3fb950");
+    el.setAttribute("stroke-width", "4");
   } else {
     el.removeAttribute("transform");
     el.setAttribute("stroke", "#8b949e");
+    el.setAttribute("stroke-width", "3");
   }
 }
 
@@ -95,12 +112,32 @@ function startBeltAnimation(speed) {
 
     // Move box if visible
     if (_boxVisible) {
-      _boxX += pxPerSec * dt;
       const box = document.getElementById("box-anim");
-      box.setAttribute("x", _boxX);
-      if (_boxX > 700) {
-        _boxVisible = false;
-        box.setAttribute("opacity", 0);
+      if (!_boxDiverting) {
+        _boxX += _boxSpeed * dt;
+        box.setAttribute("x", _boxX);
+        if (_boxX + 30 >= _boxTargetGateX) {
+          _boxDiverting = true;
+          _boxX = _boxTargetGateX - 15;
+          box.setAttribute("x", _boxX);
+        }
+        if (_boxX > 700) {
+          _boxVisible = false;
+          box.setAttribute("opacity", 0);
+          box.setAttribute("y", 55);
+          _tryDequeue();
+        }
+      } else {
+        _boxY += _boxSpeed * dt;
+        box.setAttribute("y", _boxY);
+        if (_boxY > 170) {
+          _boxVisible = false;
+          _boxDiverting = false;
+          _boxY = 55;
+          box.setAttribute("opacity", 0);
+          box.setAttribute("y", 55);
+          _tryDequeue();
+        }
       }
     }
 
@@ -117,16 +154,47 @@ function stopBeltAnimation() {
 }
 
 function spawnBox(t) {
+  // Determine box type from gate outputs (more persistent than raw sensor inputs)
+  let type = 'unknown';
+  if (t.OUT_GATE_B || t.IN_METAL_DETECT)    type = 'metal';
+  else if (t.OUT_GATE_C || t.IN_SIZE_LARGE) type = 'large';
+  else if (t.OUT_GATE_A || t.IN_SIZE_SMALL) type = 'small';
+  else if (_lastGateType)                    type = _lastGateType;
+
+  const entry = { type, beltSpeed: t.IR_SPEED_ACTUAL || 60 };
+
+  if (_boxVisible) {
+    // Queue it — drop if queue is already deep to avoid a backlog spiral
+    if (_boxQueue.length < 8) _boxQueue.push(entry);
+  } else {
+    _launchBox(entry);
+  }
+}
+
+function _tryDequeue() {
+  if (_boxQueue.length > 0) {
+    _launchBox(_boxQueue.shift());
+  }
+}
+
+function _launchBox({ type, beltSpeed }) {
+  const gateX = { metal: 475, large: 575, small: 375, unknown: 700 };
+  const color  = { metal: "#d29922", large: "#58a6ff", small: "#3fb950", unknown: "#8b949e" };
+
   const box = document.getElementById("box-anim");
   _boxX = 100;
+  _boxY = 55;
+  _boxDiverting = false;
+  _boxTargetGateX = gateX[type];
   _boxVisible = true;
-  // Color by type
-  const color = t.IN_METAL_DETECT ? "#d29922"
-              : t.IN_SIZE_LARGE   ? "#58a6ff"
-              : t.IN_SIZE_SMALL   ? "#3fb950"
-              : "#8b949e";
-  box.setAttribute("fill", color + "33");
-  box.setAttribute("stroke", color);
+  // Scale speed with belt: faster belt = faster boxes, min 300px/s, max 600px/s
+  // At 300–600px/s the belt width (~600px) is crossed in 1–2 seconds
+  _boxSpeed = Math.min(Math.max(beltSpeed / 100 * 600, 300), 600);
+
+  const c = color[type];
+  box.setAttribute("fill", c + "33");
+  box.setAttribute("stroke", c);
   box.setAttribute("opacity", 1);
   box.setAttribute("x", _boxX);
+  box.setAttribute("y", _boxY);
 }

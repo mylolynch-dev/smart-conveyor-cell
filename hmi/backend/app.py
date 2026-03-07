@@ -28,7 +28,6 @@ import uvicorn
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.responses import FileResponse, JSONResponse
-from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 
 # Add backend dir to path
@@ -250,10 +249,24 @@ async def broadcast_loop():
 
 
 # ---------------------------------------------------------------------------
-# Static file catch-all — MUST be last so REST routes above take priority
-# html=True serves index.html for / automatically
+# Frontend static file routes (explicit — no mounts)
 # ---------------------------------------------------------------------------
-app.mount("/", StaticFiles(directory=FRONTEND_DIR, html=True), name="frontend")
+
+@app.get("/")
+async def serve_index():
+    return FileResponse(os.path.join(FRONTEND_DIR, "index.html"), media_type="text/html")
+
+@app.get("/style.css")
+async def serve_css():
+    return FileResponse(os.path.join(FRONTEND_DIR, "style.css"), media_type="text/css")
+
+@app.get("/app.js")
+async def serve_appjs():
+    return FileResponse(os.path.join(FRONTEND_DIR, "app.js"), media_type="application/javascript")
+
+@app.get("/screens/{filename}")
+async def serve_screen(filename: str):
+    return FileResponse(os.path.join(FRONTEND_DIR, "screens", filename), media_type="application/javascript")
 
 
 if __name__ == "__main__":

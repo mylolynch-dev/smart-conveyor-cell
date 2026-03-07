@@ -159,6 +159,11 @@ class LadderRoutines:
 
         # Re-snapshot after HMI command side-effects
         snap = db.snapshot()
+
+        # Run state machine NOW — while IN_START_PB / IN_STOP_PB are still set.
+        # If we wait until after plc_sim.py calls sm.transition(), the momentary
+        # bits have already been cleared and AUTO_RUN never fires.
+        sm.transition(snap)
         state = sm.state
 
         # ---- Rung 4: E-stop indicator light --------------------------

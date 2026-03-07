@@ -115,13 +115,11 @@ def scan_loop(context: ModbusServerContext, db: TagDB, sm: StateMachine,
                 machine_state_val=int(sm.state),
             )
 
-            # 3. Execute all ladder logic rungs
+            # 3. Execute all ladder logic rungs (state machine transition
+            #    is called inside ladder.execute() after HMI command processing)
             ladder.execute()
 
-            # 4. Run state machine transitions
-            sm.transition(db.snapshot())
-
-            # 5. Push tag values back to Modbus datastore
+            # 4. Push tag values back to Modbus datastore
             push_to_modbus(context, db)
 
             # Log state changes
